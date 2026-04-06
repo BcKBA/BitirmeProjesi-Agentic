@@ -1,6 +1,7 @@
 import { parsePartialJson } from "@langchain/core/output_parsers";
 import { useStreamContext } from "@/providers/Stream";
 import { AIMessage, Checkpoint, Message } from "@langchain/langgraph-sdk";
+import { useRef } from "react";
 import { getContentString } from "../utils";
 import { BranchSwitcher, CommandBar } from "./shared";
 import { MarkdownText } from "../markdown-text";
@@ -14,6 +15,27 @@ import { ThreadView } from "../agent-inbox";
 import { useQueryState, parseAsBoolean } from "nuqs";
 import { GenericInterruptView } from "./generic-interrupt";
 import { useArtifact } from "../artifact";
+
+// Deep Agent'ta sub-agent state'leri streaming bittiğinde main graph'a
+// tam olarak merge edilmiyor: final `values` flush'ı bazen daha kısa bir
+// content gönderiyor ve ekranda akan cevap kısalmış gibi görünüyor.
+// Bu hook, bir mesaj için gördüğü en uzun content'i tutar ve daha kısa
+// bir versiyona geri düşmez. Mesaj ID'si değişirse peak sıfırlanır.
+function usePeakContent(id: string | undefined, current: string): string {
+  const peakRef = useRef<{ id: string | undefined; text: string }>({
+    id: undefined,
+    text: "",
+  });
+  if (peakRef.current.id !== id) {
+    peakRef.current = { id, text: current };
+    return current;
+  }
+  if (current.length >= peakRef.current.text.length) {
+    peakRef.current.text = current;
+    return current;
+  }
+  return peakRef.current.text;
+}
 
 function CustomComponent({
   message,
@@ -108,7 +130,8 @@ export function AssistantMessage({
   handleRegenerate: (parentCheckpoint: Checkpoint | null | undefined) => void;
 }) {
   const content = message?.content ?? [];
-  const contentString = getContentString(content);
+  const rawContentString = getContentString(content);
+  const contentString = usePeakContent(message?.id, rawContentString);
   const [hideToolCalls] = useQueryState(
     "hideToolCalls",
     parseAsBoolean.withDefault(false),

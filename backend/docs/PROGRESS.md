@@ -1,48 +1,57 @@
 # Progress Log
 
+## Week 3 — Agent Implementation & UI Integration (2026-04-05)
+
+### Completed (Berat Can Karakaş ile birlikte — BcKBA/BitirmeProjesi-Agentic)
+- [x] Baseline Agent (`create_agent`) implement edildi — `backend/agents/baseline_agent/agent.py`
+- [x] Baseline Agent araçları implement edildi — `read_file`, `get_repo_structure`, `search_rag`
+- [x] `search_rag` için FAISS in-memory RAG + `GoogleGenerativeAIEmbeddings` (text-embedding-004)
+- [x] `backend/shared/repo_utils.py` oluşturuldu — her iki agent ortak utils'i paylaşıyor
+- [x] `langgraph.json` güncellendi — `"agent"` (deep) + `"baseline_agent"` aynı port:2024'te
+- [x] Frontend: Next.js agent-selector dropdown — Standard Agent / Deep Agent
+- [x] Frontend: `activeAgentId` state → `useChat` hook → `langgraph-sdk` dinamik bağlantı
+- [x] Uçtan uca test tamamlandı — her iki agent UI'dan çalışıyor
+- [x] Repo monorepo yapısına taşındı: `backend/` + `frontend/` tek repo içinde
+
+### In Progress
+- [ ] Instructor collaborator invite kabulü (amirkiarafiei tarafında bekleniyor)
+
+---
+
 ## Week 2 — Scaffolding (2026-03-27)
 
 ### Completed
-- [x] `uv` package manager installed (v0.11.2)
-- [x] Project initialized with `uv init` at `c:\bitirme`
-- [x] Dependencies installed: `deepagents`, `langgraph-cli[inmem]`, `langchain-google-genai`, `python-dotenv`, `gitpython`
-- [x] `agent.py` created — Deep Agent with all default tools (planning, vfs, shell, sub-agents) + custom `clone_and_read_repo` tool
-- [x] `langgraph.json` created — graph config for `langgraph dev`
-- [x] `.env` configured with GOOGLE_API_KEY (Paid tier 1 account)
-- [x] `.gitignore` created
-- [x] MD documentation files created
-- [x] `gh` CLI v2.68.1 installed → `C:\Users\Alperen Kayım\.local\bin\gh.exe`
-- [x] `uv` + `gh` added to Windows user PATH permanently
-- [x] `gh auth login` completed (GitHub account: alperenkayim)
-- [x] MD documentation system created (CONTEXT, PROGRESS, DECISIONS, AGENTS, SECURITY, PROMPT_deep_agent)
-- [x] GitHub repo `bitirme-backend` created → https://github.com/alperenkayim/bitirme-backend
-- [x] GitHub repo `bitirme-frontend` created → https://github.com/alperenkayim/bitirme-frontend
-- [x] `langgraph dev` tested — server running on port 2024, LangGraph Studio connected
-- [x] Agent tested — successfully cloned and analyzed GitHub repositories via `clone_and_read_repo` tool
-- [x] Instructor `amirkiarafiei` collaborator invite sent to both repos
-
-### In Progress
-- [ ] Instructor collaborator invite acceptance (pending on their end)
-- [ ] GitHub Copilot account approval (pending)
+- [x] `uv` package manager kuruldu (v0.11.2)
+- [x] Proje `uv init` ile başlatıldı
+- [x] Bağımlılıklar: `deepagents`, `langgraph-cli[inmem]`, `langchain-google-genai`, `python-dotenv`, `gitpython`, `faiss-cpu`, `langchain-community`
+- [x] Deep Agent implement edildi — `agents/deep_agent/agent.py` (`create_deep_agent`)
+- [x] Deep Agent araçları: `find_local_repos`, `clone_and_read_repo`, `read_local_repo`, `read_repo_file`
+- [x] `langgraph.json` oluşturuldu
+- [x] `.env` konfigüre edildi — `GOOGLE_API_KEY` (Paid tier 1, 10K RPD)
+- [x] `gh` CLI v2.68.1 kuruldu → `C:\Users\Alperen Kayım\.local\bin\gh.exe`
+- [x] `uv` + `gh` Windows user PATH'e kalıcı eklendi
+- [x] `gh auth login` tamamlandı (GitHub: alperenkayim)
+- [x] `langgraph dev` test edildi — port 2024, LangGraph Studio bağlantısı
+- [x] Agent test edildi — `clone_and_read_repo` ile GitHub repoları başarıyla analiz edildi
+- [x] Instructor `amirkiarafiei` collaborator daveti gönderildi
 
 ---
 
-## Week 1 — Setup (completed before Week 2)
+## Week 1 — Setup
 
 ### Completed
-- [x] Git & GitHub account ready
-- [x] VS Code installed with Copilot extension
-- [x] Gemini Code Assist (Antigravity) set up
-- [x] MCP servers configured in VS Code: `langchain-docs`, `deepwiki`
-- [x] LaTeX environment configured (for research paper)
+- [x] Git & GitHub hazır
+- [x] VS Code + Copilot extension kuruldu
+- [x] Gemini Code Assist (Antigravity) kuruldu
+- [x] MCP servers: `langchain-docs`, `deepwiki`
+- [x] LaTeX ortamı (research paper için)
 
 ---
 
-## Upcoming Weeks
+## Upcoming
 
-| Week | Goal |
-|------|------|
-| Week 3 | ReAct Agent implementation |
-| Week 4+ | Custom frontend UI |
-| Later | SWE-QA dataset evaluation |
-| Final | Research paper |
+| Hafta | Hedef |
+|-------|-------|
+| Week 4 | Frontend özelleştirme (repo URL input, gelişmiş UI) |
+| Later | SWE-QA dataset evaluation — her iki agent benchmark |
+| Final | Research paper — mimari karşılaştırması |

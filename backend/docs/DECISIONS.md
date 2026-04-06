@@ -18,17 +18,18 @@
 
 ---
 
-## ADR-003: Deep Agent before ReAct Agent
+## ADR-003: Deep Agent before Baseline Agent
 
-**Decision:** Implement Deep Agent first (Week 2), ReAct Agent later.
-**Reason:** Project assignment order. Deep Agent is more complex (hierarchical, sub-agents) so scaffolding it first establishes the infrastructure for both.
+**Decision:** Implement Deep Agent first (Week 2), Baseline Agent later (Week 3).
+**Reason:** Project assignment order. Deep Agent is more complex (hierarchical, sub-agents) so scaffolding it first establishes the shared infrastructure (`repo_utils.py`) for both.
 
 ---
 
-## ADR-004: LangGraph Studio as frontend for now
+## ADR-004: Custom frontend (Next.js) instead of LangGraph Studio
 
-**Decision:** Use the hosted LangGraph Studio UI (`smith.langchain.com/studio`) instead of building a custom frontend.
-**Reason:** Week 2 task says to use the LangChain-provided UI to move fast and prototype. Custom UI is a future-week task.
+**Decision:** Week 3'te LangGraph Studio hosted UI yerine fork edilmiş Deep Agents UI (Next.js) kullanıldı.
+**Reason:** Week 3 görevi agent seçici dropdown içeren özel UI gerektiriyor. `@langchain/langgraph-sdk` ile her iki agent'a tek frontend'den bağlanmak mümkün.
+**How it works:** Frontend `activeAgentId` state'ini tutar. `useChat` hook bu ID'yi LangGraph client'a geçirir. Kullanıcı dropdown'dan seçince ilgili graph ID'ye (`agent` veya `baseline_agent`) bağlanır.
 
 ---
 
@@ -39,10 +40,11 @@
 
 ---
 
-## ADR-006: Single backend repo, separate frontend repo
+## ADR-006: Monorepo — backend + frontend aynı repoda
 
-**Decision:** `bitirme-backend` for Python agent code, `bitirme-frontend` for UI code.
-**Reason:** Project requirement — instructor expects two separate repositories. Also good separation of concerns.
+**Decision:** `BcKBA/BitirmeProjesi-Agentic` tek repo, `backend/` ve `frontend/` alt dizinleri var.
+**Reason:** Instructor'ın Week 3'te beklediği yapı bu. Hem frontend hem backend kodları aynı repoda yönetimi kolaylaştırır.
+**Not:** Önceden ayrı repolar (`alperenkayim/bitirme-backend`, `alperenkayim/bitirme-frontend`) vardı, Week 3'te Berat Can'ın reposuna geçildi.
 
 ---
 
@@ -50,4 +52,27 @@
 
 **Decision:** Add a custom `clone_and_read_repo` tool using `gitpython` library instead of relying on the agent's built-in shell tool to run `git clone`.
 **Reason:** The Deep Agent's shell tool runs in a sandboxed environment with no access to the host system's `git` binary (`git --version` returned "No data"). Custom tool uses `gitpython` in-process, returns file tree + file contents directly to the agent — no VFS access needed.
-**How to apply:** Tool is defined in `agent.py`. Pass any public GitHub URL and the agent will clone and analyze it.
+**How to apply:** Tool is defined in `agents/deep_agent/tools.py`. Shared clone logic is in `shared/repo_utils.py`.
+
+---
+
+## ADR-008: Shared repo_utils.py for both agents
+
+**Decision:** `backend/shared/repo_utils.py` içinde `clone_repo()`, `build_file_tree()`, `read_text_file()` fonksiyonları her iki agent tarafından import edilir.
+**Reason:** Deep Agent ve Baseline Agent'ın repo okuma mantığı aynı. Tekrar eden kodu önlemek ve consistency sağlamak için paylaşılan utils çıkarıldı.
+**How to apply:** `from shared.repo_utils import clone_repo, build_file_tree, read_text_file`
+
+---
+
+## ADR-009: FAISS in-memory RAG for Baseline Agent
+
+**Decision:** Baseline Agent'ın `search_rag` tool'u için FAISS in-memory vektör store kullanıldı.
+**Reason:** Hosted vector DB (Pinecone, Weaviate vb.) kurulumu gerektirmez. `faiss-cpu` ile sıfırdan index build edilir, repo path'e göre cache'lenir. SWE-QA paper'ın tanımladığı `search_rag` aracının minimal implementasyonu.
+**How to apply:** `langchain_community.vectorstores.FAISS` + `GoogleGenerativeAIEmbeddings`. Index ilk `search_rag` çağrısında build edilir, sonrakiler cache'den döner.
+
+---
+
+## ADR-010: Baseline Agent strictly 3 tools only
+
+**Decision:** Baseline Agent'a sadece `read_file`, `get_repo_structure`, `search_rag` verildi. Shell, planning, VFS veya başka araç yok.
+**Reason:** SWE-QA paper'ın tanımladığı baseline agent kısıtlaması. Karşılaştırma geçerli olsun diye Deep Agent'ın ekstra kabiliyetleri Baseline'a taşınmaz.

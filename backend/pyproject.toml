@@ -12,3 +12,6 @@ dependencies = [
     "langgraph-cli[inmem]>=0.4.19",
     "python-dotenv>=1.2.2",
 ]
+
+[tool.uv.scripts]
+dev = "langgraph dev --no-browser"

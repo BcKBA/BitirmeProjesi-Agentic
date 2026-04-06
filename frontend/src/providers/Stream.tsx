@@ -91,7 +91,7 @@ const StreamSession = ({
       },
     }),
     threadId: threadId ?? null,
-    fetchStateHistory: true,
+    fetchStateHistory: false,
     onCustomEvent: (event, options) => {
       if (isUIMessage(event) || isRemoveUIMessage(event)) {
         options.mutate((prev) => {
@@ -134,8 +134,10 @@ const StreamSession = ({
 };
 
 // Default values for the form
-const DEFAULT_API_URL = "http://localhost:2024";
-const DEFAULT_ASSISTANT_ID = "agent";
+const DEFAULT_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:2024";
+const DEFAULT_ASSISTANT_ID =
+  process.env.NEXT_PUBLIC_ASSISTANT_ID || "agent";
 const AGENT_BUILDER_AUTH_SCHEME = "langsmith-api-key";
 
 export const StreamProvider: React.FC<{ children: ReactNode }> = ({
@@ -174,9 +176,9 @@ export const StreamProvider: React.FC<{ children: ReactNode }> = ({
     _setApiKey(key);
   };
 
-  // Determine final values to use, prioritizing URL params then env vars
-  const finalApiUrl = apiUrl || envApiUrl;
-  const finalAssistantId = assistantId || envAssistantId;
+  // Determine final values to use, prioritizing URL params then env vars then hardcoded defaults
+  const finalApiUrl = apiUrl || envApiUrl || DEFAULT_API_URL;
+  const finalAssistantId = assistantId || envAssistantId || DEFAULT_ASSISTANT_ID;
   const finalAuthScheme = authScheme || envAuthScheme || "";
 
   // Show the form if we: don't have an API URL, or don't have an assistant ID
